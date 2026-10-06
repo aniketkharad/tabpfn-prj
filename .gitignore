@@ -1,0 +1,25 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python / uv
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv/
+.pytest_cache/
+
+# run artifacts and data caches
+runs/
+data/
+workspaces/*/data/
+relarena-cache/
+.cache/
+outbox.jsonl
+
+# os
+.DS_Store

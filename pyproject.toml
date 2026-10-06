@@ -1,0 +1,28 @@
+[project]
+name = "relpilot"
+version = "0.1.0"
+description = "MCP server: zero-shot relational predictions with TabPFN-Rel, gated by temporal backtests"
+readme = "README.md"
+authors = [
+    { name = "Aniket Kharad", email = "92918607+aniketkharad@users.noreply.github.com" }
+]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "google-genai>=2.28.0",
+    "mcp>=2.3.0",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.6.1",
+    "tabpfn-rel[api]>=0.0.5",
+]
+
+[project.scripts]
+relpilot = "relpilot:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
