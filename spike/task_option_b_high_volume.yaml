@@ -1,0 +1,29 @@
+# High-Volume Seller Growth Surge (binary classification)
+database: database.yaml
+
+entity_table: sellers
+entity_col: seller_id
+time_col: timestamp
+target_col: high_volume_seller
+task_type: binary_classification
+
+timedelta: 30 days
+num_eval_timestamps: 1
+val_timestamp: '2018-05-15 00:00:00'
+test_timestamp: '2018-06-15 00:00:00'
+
+query: |
+  SELECT timestamp, seller_id,
+    CAST((
+      SELECT COUNT(DISTINCT order_id) FROM order_items
+      WHERE order_items.seller_id = sellers.seller_id
+        AND order_items.purchase_ts > timestamp
+        AND order_items.purchase_ts <= timestamp + INTERVAL '{timedelta}'
+    ) >= 5 AS INTEGER) AS high_volume_seller
+  FROM timestamp_df, sellers
+  WHERE EXISTS (
+      SELECT 1 FROM order_items
+      WHERE order_items.seller_id = sellers.seller_id
+        AND purchase_ts > timestamp - INTERVAL '{timedelta}'
+        AND purchase_ts <= timestamp
+  )
