@@ -11,13 +11,13 @@ This document contains **ONLY** verified, empirically measured metrics from real
 - **Model**: `tabpfn-rel-client-latest` (hosted TabPFN-3.5 API)
 - **Evaluation Split**: Historical test cohort anchored at `2018-06-15` (strictly censored to prevent future lookahead leakage)
 - **Cohort Size**: **1,088 active sellers** (236 positive ground truth labels, 21.7% base rate)
-- **Execution Run ID**: `run_20261006_145425_8b5ae4`
+- **Execution Run ID**: `run_20261006_163338_08a817`
 
 ### Measured Discrimination & Calibration
 
 | Method / Model | AUROC | Log Loss | ECE (10 bins) | Description |
 | :--- | :---: | :---: | :---: | :--- |
-| **TabPFN-Rel (zero-shot)** | **0.7734** | **0.4776** | **0.1310** | Zero-shot DFS + TabPFN-3.5 API in-context prediction |
+| **TabPFN-Rel (zero-shot)** | **0.7734** | **0.4778** | **0.1312** | Zero-shot DFS + TabPFN-3.5 API in-context prediction |
 | **Baseline: Global Constant** | 0.5000 | — | — | Emits global training target base rate |
 | **Baseline: Per-Entity Constant** | **0.7160** | — | — | Emits per-entity historical rate (mapped via pkey_maps), fallback to global |
 
@@ -32,7 +32,7 @@ This document contains **ONLY** verified, empirically measured metrics from real
 
 ### Precision Gate Decision (at $\ge 75\%$ Precision Target)
 
-- **Backtest-Derived Threshold ($\tau$)**: **0.7593**
+- **Backtest-Derived Threshold ($\tau$)**: **0.7595**
 - **Empirical Backtest Precision**: **75.34%** (55 true positives out of 73 entities)
 - **Threshold Support**: **73 entities**
 - **Autonomous Actions Proposed**: **73 entities** (appended to `outbox.jsonl` with status `proposed`)
@@ -44,10 +44,10 @@ This document contains **ONLY** verified, empirically measured metrics from real
 
 Both additional tasks were executed on the same database and test split:
 
-| Task Name | Target Outcome | TabPFN-Rel AUROC | Baseline AUROC | Run ID |
+| Task Name | Target Outcome | TabPFN-Rel AUROC | Baseline AUROC | Run ID / Source |
 | :--- | :--- | :---: | :---: | :--- |
-| **High-Volume Growth Surge** | Will active seller receive $\ge 5$ orders in next 30d? | **0.8964** | 0.5000 | `run_spike2` |
-| **Official Seller Churn** | Will active seller receive 0 orders in next 30d? | **0.7766** | 0.5000 (0.688 per-ent) | `run_step4` |
+| **High-Volume Growth Surge** | Will active seller receive $\ge 5$ orders in next 30d? | **0.8964** | 0.5000 | Spike script (`spike/run_spike2.py`) |
+| **Official Seller Churn** | Will active seller receive 0 orders in next 30d? | **0.7766** | 0.5000 (0.688 per-ent) | Spike script (`spike/run_step4.py`) |
 
 ---
 
@@ -56,5 +56,6 @@ Both additional tasks were executed on the same database and test split:
 1. **Single Dataset**: All metrics are evaluated on the Olist Brazilian E-Commerce dataset (~100,000 orders). Performance across disparate database domains (financial transactions, healthcare EHR, logistics graphs) will vary.
 2. **Sample Size**: The evaluation cohort contains 1,088 active sellers. While statistically sufficient for a minimum support of 20, larger databases with tens of thousands of active entities may reveal different calibration nuances.
 3. **Single Temporal Cutoff**: Evaluations used a single fixed test cutoff (`2018-06-15`). Multi-period rolling backtests across shifting economic seasons were not performed.
-4. **Alpha Status**: TabPFN-Rel and RelArena are early alpha research releases (`relarena-α`, `tabpfn-rel==0.0.5`). APIs, featurization depth bounds, and schema contracts are subject to upstream evolution.
-5. **No Production Action Integrations**: Proposed actions are appended to `outbox.jsonl` as an auditable queue; actual production integrations (dispatching emails, CRM webhooks) must consume from this outbox.
+4. **Threshold Generalization & In-Sample Selection**: When selecting the empirical decision threshold ($\tau$) on the test period, sample variance can cause out-of-sample precision to fluctuate below the nominal target. For conservative out-of-sample guarantees, RelPilot provides the `use_wilson_bound=True` option in `find_act_threshold` and `propose_actions` to require that the 90% Wilson lower confidence bound meets the precision target.
+5. **Alpha Status**: TabPFN-Rel and RelArena are early alpha research releases (`relarena-α`, `tabpfn-rel==0.0.5`). APIs, featurization depth bounds, and schema contracts are subject to upstream evolution.
+6. **No Production Action Integrations**: Proposed actions are appended to `outbox.jsonl` as an auditable queue; actual production integrations (dispatching emails, CRM webhooks) must consume from this outbox.

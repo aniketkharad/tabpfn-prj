@@ -1,15 +1,15 @@
 {
-  "run_id": "run_20261006_145425_8b5ae4",
+  "run_id": "run_20261006_163338_08a817",
   "task": "bad_review_risk",
   "model": "tabpfn-rel-client-latest",
   "backtest_samples": 1088,
   "auroc": 0.7734,
   "baseline_global_auroc": 0.5,
   "baseline_per_entity_auroc": 0.716,
-  "log_loss": 0.4776,
-  "ece": 0.131,
+  "log_loss": 0.4778,
+  "ece": 0.1312,
   "probabilities_available": true,
-  "recommended_threshold": 0.7842,
+  "recommended_threshold": 0.7863,
   "threshold_support": 61,
   "threshold_precision": 0.8033,
   "precision_at_k": {
@@ -24,7 +24,7 @@
     "lift@50": 3.87,
     "lift@100": 3.23
   },
-  "fit_duration_seconds": 25.05,
+  "fit_duration_seconds": 28.12,
   "reliability_bins": [
     {
       "bin": 0,
@@ -32,7 +32,7 @@
         0.0,
         0.1
       ],
-      "count": 11,
+      "count": 8,
       "mean_pred": 0.0955,
       "empirical_rate": 0.0,
       "calibration_gap": 0.0955
@@ -43,10 +43,10 @@
         0.1,
         0.2
       ],
-      "count": 305,
-      "mean_pred": 0.1543,
-      "empirical_rate": 0.0689,
-      "calibration_gap": 0.0854
+      "count": 307,
+      "mean_pred": 0.1541,
+      "empirical_rate": 0.0684,
+      "calibration_gap": 0.0857
     },
     {
       "bin": 2,
@@ -54,10 +54,10 @@
         0.2,
         0.3
       ],
-      "count": 278,
+      "count": 279,
       "mean_pred": 0.247,
-      "empirical_rate": 0.1295,
-      "calibration_gap": 0.1175
+      "empirical_rate": 0.129,
+      "calibration_gap": 0.118
     },
     {
       "bin": 3,
@@ -65,10 +65,10 @@
         0.3,
         0.4
       ],
-      "count": 166,
+      "count": 165,
       "mean_pred": 0.3494,
-      "empirical_rate": 0.1506,
-      "calibration_gap": 0.1988
+      "empirical_rate": 0.1576,
+      "calibration_gap": 0.1918
     },
     {
       "bin": 4,
@@ -76,10 +76,10 @@
         0.4,
         0.5
       ],
-      "count": 91,
-      "mean_pred": 0.4454,
-      "empirical_rate": 0.2967,
-      "calibration_gap": 0.1487
+      "count": 92,
+      "mean_pred": 0.4451,
+      "empirical_rate": 0.2826,
+      "calibration_gap": 0.1625
     },
     {
       "bin": 5,
@@ -87,10 +87,10 @@
         0.5,
         0.6
       ],
-      "count": 77,
+      "count": 76,
       "mean_pred": 0.5512,
-      "empirical_rate": 0.4545,
-      "calibration_gap": 0.0966
+      "empirical_rate": 0.4605,
+      "calibration_gap": 0.0907
     },
     {
       "bin": 6,
@@ -99,9 +99,9 @@
         0.7
       ],
       "count": 67,
-      "mean_pred": 0.6448,
+      "mean_pred": 0.6432,
       "empirical_rate": 0.403,
-      "calibration_gap": 0.2418
+      "calibration_gap": 0.2402
     },
     {
       "bin": 7,
@@ -109,10 +109,10 @@
         0.7,
         0.8
       ],
-      "count": 42,
-      "mean_pred": 0.7544,
-      "empirical_rate": 0.5476,
-      "calibration_gap": 0.2068
+      "count": 44,
+      "mean_pred": 0.7542,
+      "empirical_rate": 0.5227,
+      "calibration_gap": 0.2315
     },
     {
       "bin": 8,
@@ -120,10 +120,10 @@
         0.8,
         0.9
       ],
-      "count": 26,
-      "mean_pred": 0.8478,
-      "empirical_rate": 0.7692,
-      "calibration_gap": 0.0785
+      "count": 25,
+      "mean_pred": 0.8493,
+      "empirical_rate": 0.8,
+      "calibration_gap": 0.0493
     },
     {
       "bin": 9,
@@ -132,11 +132,11 @@
         1.0
       ],
       "count": 25,
-      "mean_pred": 0.9521,
+      "mean_pred": 0.9514,
       "empirical_rate": 0.88,
-      "calibration_gap": 0.0721
+      "calibration_gap": 0.0714
     }
   ],
-  "api_usage_before": "Currently, you have used 50000 of the allowed limit of 20000000 credits. The limit will reset at 2026-11-01 00:00:00 UTC.",
-  "api_usage_after": "Currently, you have used 50000 of the allowed limit of 20000000 credits. The limit will reset at 2026-11-01 00:00:00 UTC."
+  "api_usage_before": "Currently, you have used 70000 of the allowed limit of 20000000 credits. The limit will reset at 2026-11-01 00:00:00 UTC.",
+  "api_usage_after": "Currently, you have used 90000 of the allowed limit of 20000000 credits. The limit will reset at 2026-11-01 00:00:00 UTC."
 }
