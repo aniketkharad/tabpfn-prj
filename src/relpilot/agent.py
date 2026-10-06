@@ -92,37 +92,42 @@ class RelPilotStdioAgent:
                 self._log(msg)
                 return msg
 
-            # Generate content with retry once on 429/503
+            # Generate content with retry once on transient 503; halt immediately on 429
             response = None
-            models_to_try = [self.model]
-            if self.model != self.fallback_model:
-                models_to_try.append(self.fallback_model)
-
-            for target_model in models_to_try:
-                for attempt in range(2):
-                    try:
-                        self.call_count += 1
-                        response = self.client.models.generate_content(
-                            model=target_model,
-                            contents=self.contents,
-                            config=types.GenerateContentConfig(
-                                system_instruction=SYSTEM_PROMPT,
-                                tools=gemini_tools,
-                            ),
-                        )
-                        break
-                    except errors.APIError as e:
-                        if attempt == 0 and ("503" in str(e) or "429" in str(e)):
-                            time.sleep(2.0)
-                            continue
-                        break
-                    except Exception:
-                        break
-                if response is not None:
+            for attempt in range(2):
+                try:
+                    self.call_count += 1
+                    response = self.client.models.generate_content(
+                        model=self.model,
+                        contents=self.contents,
+                        config=types.GenerateContentConfig(
+                            system_instruction=SYSTEM_PROMPT,
+                            tools=gemini_tools,
+                        ),
+                    )
                     break
+                except errors.APIError as e:
+                    err_str = str(e)
+                    if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+                        halt_msg = (
+                            f"\n[Quota Alert] Gemini API returned HTTP 429 (Resource Exhausted). "
+                            f"Halting session immediately per safety policy. Details: {e}"
+                        )
+                        self._log(halt_msg)
+                        return halt_msg
+                    if attempt == 0 and "503" in err_str:
+                        time.sleep(2.0)
+                        continue
+                    err_msg = f"[RelPilot Error] Gemini API error: {e}"
+                    self._log(err_msg)
+                    return err_msg
+                except Exception as e:
+                    err_msg = f"[RelPilot Error] Unexpected error during Gemini call: {e}"
+                    self._log(err_msg)
+                    return err_msg
 
             if response is None:
-                err_msg = "[RelPilot Error] Gemini API request failed after retry."
+                err_msg = "[RelPilot Error] Gemini API request returned no response."
                 self._log(err_msg)
                 return err_msg
 

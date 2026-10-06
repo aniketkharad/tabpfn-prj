@@ -17,7 +17,9 @@ dependencies = [
 ]
 
 [project.scripts]
-relpilot = "relpilot:main"
+relpilot = "relpilot.agent:main"
+relpilot-server = "relpilot.server:main"
+relpilot-agent = "relpilot.agent:main"
 
 [build-system]
 requires = ["uv_build>=0.12.7,<0.13.0"]

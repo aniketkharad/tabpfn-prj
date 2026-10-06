@@ -93,6 +93,7 @@ def propose_actions(
     run_id: str,
     action: str,
     min_precision: float = DEFAULT_MIN_PRECISION,
+    use_wilson_bound: bool = False,
 ) -> str:
     """The Gate: propose operational actions for entities above the backtest precision threshold."""
     try:
@@ -133,6 +134,7 @@ def propose_actions(
             y_prob,
             min_precision=min_precision,
             min_support=DEFAULT_MIN_SUPPORT,
+            use_wilson_bound=use_wilson_bound,
         )
 
         preds_df = pd.read_parquet(preds_path)
@@ -156,12 +158,13 @@ def propose_actions(
             "threshold": threshold,
             "achieved_precision": achieved_prec,
             "threshold_support": support,
-            "proposed_count": written_count,
+            "proposed_count": len(proposed),
+            "newly_written_count": written_count,
             "needs_review_count": len(needs_review),
             "outbox_file": str(outbox_file),
             "status": "actions_proposed" if threshold is not None else "no_threshold_met",
             "message": (
-                f"Proposed {written_count} actions meeting {min_precision:.0%} precision target."
+                f"Proposed {len(proposed)} actions meeting {min_precision:.0%} precision target ({written_count} newly appended to outbox)."
                 if threshold is not None
                 else f"No backtest threshold achieved the required {min_precision:.0%} precision target with minimum support of {DEFAULT_MIN_SUPPORT}."
             ),

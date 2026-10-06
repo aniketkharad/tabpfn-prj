@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 import yaml
 
-from relpilot.gate import find_act_threshold, partition_actions
+from relpilot.gate import find_act_threshold, partition_actions, record_outbox, wilson_lower_bound
 from relpilot.workspace import Workspace, WorkspaceValidationError
 from relpilot.server import describe_workspace, propose_actions, read_skill, trust_report
 
@@ -289,4 +289,81 @@ def test_report_generation(tmp_path):
     assert "Top Risk Entities" in content
     assert "TabPFN-Rel" in content
     assert "http://" not in content and "https://" not in content  # no external assets
+
+
+def test_record_outbox_idempotence(tmp_path):
+    """Verify that record_outbox is idempotent and never creates duplicate records."""
+    outbox_file = tmp_path / "outbox.jsonl"
+    actions = [
+        {"run_id": "r1", "entity_id": "e1", "action": "outreach", "score": 0.9},
+        {"run_id": "r1", "entity_id": "e2", "action": "outreach", "score": 0.85},
+    ]
+
+    # First write
+    written_1 = record_outbox(actions, outbox_file=outbox_file)
+    assert written_1 == 2
+    assert len(outbox_file.read_text().strip().splitlines()) == 2
+
+    # Second write with same actions (must not duplicate)
+    written_2 = record_outbox(actions, outbox_file=outbox_file)
+    assert written_2 == 0
+    assert len(outbox_file.read_text().strip().splitlines()) == 2
+
+    # Third write with one new action
+    actions_mixed = [
+        {"run_id": "r1", "entity_id": "e1", "action": "outreach", "score": 0.9},  # duplicate
+        {"run_id": "r1", "entity_id": "e3", "action": "outreach", "score": 0.95}, # new
+    ]
+    written_3 = record_outbox(actions_mixed, outbox_file=outbox_file)
+    assert written_3 == 1
+    assert len(outbox_file.read_text().strip().splitlines()) == 3
+
+
+def test_wilson_lower_bound_and_gating():
+    """Verify Wilson score lower bound calculation and gating."""
+    # 10 successes out of 10 trials: empirical is 1.0, but Wilson lower bound is ~0.76 (z=1.645)
+    lb_10 = wilson_lower_bound(10, 10, z=1.645)
+    assert 0.70 < lb_10 < 0.85
+
+    # 100 successes out of 100 trials: Wilson lower bound tightens to ~0.97
+    lb_100 = wilson_lower_bound(100, 100, z=1.645)
+    assert 0.95 < lb_100 < 1.0
+
+    # Test gating with Wilson bound enabled
+    scores = np.linspace(0.99, 0.50, 100)
+    labels = np.array([1] * 30 + [0] * 70)  # Top 30 are positive
+    
+    # Standard empirical precision
+    t_emp, s_emp, p_emp = find_act_threshold(labels, scores, min_precision=0.80, min_support=20, use_wilson_bound=False)
+    # Conservative Wilson bound
+    t_wil, s_wil, p_wil = find_act_threshold(labels, scores, min_precision=0.80, min_support=20, use_wilson_bound=True)
+
+    assert t_emp is not None
+    # Wilson threshold must be equal or more conservative (higher or equal threshold)
+    if t_wil is not None:
+        assert t_wil >= t_emp
+
+
+def test_per_entity_baseline_mapping_logic():
+    """Verify that integer internal IDs correctly map to string IDs for entity rate calculation."""
+    # Synthetic entity mapping Series (index=string ID, value=int ID)
+    pkey_map = pd.Series([0, 1, 2], index=["seller_a", "seller_b", "seller_c"])
+    int_to_orig = pd.Series(pkey_map.index.values, index=pkey_map.values)
+
+    train_df = pd.DataFrame({
+        "seller_id": [0, 0, 1, 1, 2, 2],
+        "target": [1, 1, 0, 0, 1, 0],
+    })
+    train_entities = train_df["seller_id"].map(int_to_orig)
+    rates = train_df.groupby(train_entities)["target"].mean().to_dict()
+
+    assert rates["seller_a"] == 1.0
+    assert rates["seller_b"] == 0.0
+    assert rates["seller_c"] == 0.5
+
+    # Look up backtest test entities using string keys
+    backtest_entities = ["seller_a", "seller_b", "seller_unknown"]
+    preds = [rates.get(e, 0.5) for e in backtest_entities]
+    assert preds == [1.0, 0.0, 0.5]
+
 

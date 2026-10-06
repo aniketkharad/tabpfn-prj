@@ -1,0 +1,27 @@
+{
+  "run_id": "run_20261006_145425_8b5ae4",
+  "task": "bad_review_risk",
+  "model": "tabpfn-rel-client-latest",
+  "backtest_samples": 1088,
+  "auroc": 0.7734,
+  "baseline_global_auroc": 0.5,
+  "baseline_per_entity_auroc": 0.716,
+  "log_loss": 0.4776,
+  "ece": 0.131,
+  "probabilities_available": true,
+  "recommended_threshold": 0.7842,
+  "threshold_support": 61,
+  "threshold_precision": 0.8033,
+  "precision_at_k": {
+    "p@10": 1.0,
+    "p@25": 0.88,
+    "p@50": 0.84,
+    "p@100": 0.7
+  },
+  "lift_at_k": {
+    "lift@10": 4.61,
+    "lift@25": 4.06,
+    "lift@50": 3.87,
+    "lift@100": 3.23
+  }
+}

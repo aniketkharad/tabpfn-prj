@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import time
 import uuid
 from pathlib import Path
@@ -121,7 +122,7 @@ def run_task(
     # Query usage before fit
     try:
         usage_before = get_api_usage()
-        print(f"[API Usage Before Fit] {usage_before}")
+        print(f"[API Usage Before Fit] {usage_before}", file=sys.stderr)
     except Exception as e:
         usage_before = f"Unavailable: {e}"
 
@@ -134,21 +135,14 @@ def run_task(
     time_col = spec.task.time_col
 
     # Train TabPFN-Rel on historical labels
-    print(f"[RelPilot Engine] Fitting {model} on task '{task_name}' (n_trials=0, seed={seed})...")
+    print(f"[RelPilot Engine] Fitting {model} on task '{task_name}' (n_trials=0, seed={seed})...", file=sys.stderr)
     start_time = time.perf_counter()
     fitted = context.fit(model=model, n_trials=0, seed=seed, cache_dir=cache_dir)
     fit_duration = time.perf_counter() - start_time
-    print(f"[RelPilot Engine] Fit finished in {fit_duration:.2f} s")
-
-    # Query usage after fit
-    try:
-        usage_after = get_api_usage()
-        print(f"[API Usage After Fit] {usage_after}")
-    except Exception as e:
-        usage_after = f"Unavailable: {e}"
+    print(f"[RelPilot Engine] Fit finished in {fit_duration:.2f} s", file=sys.stderr)
 
     # Backtest on the latest fully-labelled period
-    print("[RelPilot Engine] Computing backtest on latest fully-labelled period...")
+    print("[RelPilot Engine] Computing backtest on latest fully-labelled period...", file=sys.stderr)
     test_labels = context.compute_test_labels()
 
     # Predict test cohort for backtest
@@ -192,9 +186,19 @@ def run_task(
         p_at_k, lift_at_k = compute_precision_and_lift_at_k(y_true, y_prob)
 
     # Baselines (pure in-process, zero API cost)
+    ds = getattr(context._source, "_dataset", None)
     train_df = context.task.get_table("train", mask_input_cols=False).df
     global_rate = float(train_df[target_col].mean()) if len(train_df) > 0 else 0.5
-    entity_rates = train_df.groupby(entity_col)[target_col].mean().to_dict()
+
+    # Map internal integer IDs to original entity IDs if pkey_map exists
+    pkey_map = ds.pkey_maps.get(spec.task.entity_table) if ds and hasattr(ds, "pkey_maps") else None
+    if pkey_map is not None:
+        int_to_orig = pd.Series(pkey_map.index.values, index=pkey_map.values)
+        train_entities = train_df[entity_col].map(int_to_orig)
+    else:
+        train_entities = train_df[entity_col]
+
+    entity_rates = train_df.groupby(train_entities)[target_col].mean().to_dict()
 
     per_entity_preds = np.array([entity_rates.get(ent, global_rate) for ent in scored_backtest[entity_col]])
     if len(np.unique(y_true)) > 1:
@@ -219,6 +223,13 @@ def run_task(
     # Cap live entities to MAX_PREDICT_ENTITIES if needed
     if len(live_preds) > MAX_PREDICT_ENTITIES:
         live_preds = live_preds.sort_values(by=pred_col, ascending=False).head(MAX_PREDICT_ENTITIES)
+
+    # Query usage after fit and predictions have completed
+    try:
+        usage_after = get_api_usage()
+        print(f"[API Usage After Predict] {usage_after}", file=sys.stderr)
+    except Exception as e:
+        usage_after = f"Unavailable: {e}"
 
     # Generate Run ID and persist artifacts
     run_id = f"run_{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"

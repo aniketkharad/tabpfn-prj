@@ -14,7 +14,9 @@ wheels/
 .pytest_cache/
 
 # run artifacts and data caches
-runs/
+runs/*
+!runs/demo_run/
+!runs/demo_run/**
 data/
 workspaces/*/data/
 relarena-cache/

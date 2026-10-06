@@ -12,7 +12,7 @@ RelPilot requires:
 An autonomous agent acts on predictions **ONLY** where an empirical temporal backtest proves the model achieves the required precision target with statistical support.
 
 <p align="center">
-  <img src="articats/report.png" alt="RelPilot Trust & Action Report" width="850"/>
+  <img src="assets/report.png" alt="RelPilot Trust & Action Report" width="850"/>
 </p>
 
 ---
@@ -57,24 +57,31 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
    uv run pytest tests/
    ```
 
-5. **Run the Scripted End-to-End Demo**:
+5. **Offline Sample Replay (Zero API Token Cost)**:
+   Judges can instantly inspect the committed sample run without requiring API keys:
+   ```bash
+   # Generate self-contained HTML Trust Report
+   uv run python -m relpilot.report runs/demo_run
+   ```
+
+6. **Verify Data Tables for Workspace (Optional)**:
+   ```bash
+   uv run python scripts/prepare_data.py
+   ```
+
+7. **Run the Scripted End-to-End Demo (Requires Live APIs)**:
    ```bash
    uv run --env-file .env python -m relpilot.demo
    ```
 
-6. **Launch the Interactive Gemini CLI REPL**:
+8. **Launch the Interactive Gemini CLI REPL**:
    ```bash
-   uv run --env-file .env python -m relpilot.agent
+   uv run --env-file .env relpilot
    ```
 
-7. **Run as an MCP Stdio Server**:
+9. **Run as an MCP Stdio Server**:
    ```bash
-   uv run --env-file .env python -m relpilot.server
-   ```
-
-8. **Generate Self-Contained HTML Trust Report**:
-   ```bash
-   uv run python -m relpilot.report runs/<run_id>
+   uv run --env-file .env relpilot-server
    ```
 
 ---

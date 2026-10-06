@@ -40,9 +40,9 @@
 ### (d) Zero-Cost Baseline Models & Model Selection Interface
 - **Zero API Cost Models**:
   - `constant-global`: Emits the global mean / base rate of the target from the training set.
-  - `constant-per-entity`: Emits each entity's own historical target mean/rate if entity history exists, falling back to the global rate.
+  - `constant-per-entity`: Emits each entity's own historical target mean/rate if entity history exists, falling back to the global rate. Note: requires mapping internal integer IDs back to original entity strings via `dataset.pkey_maps`.
   - `lightgbm`: GBDT trained locally on Deep Feature Synthesis (DFS) tabular aggregates.
-  *(Note: `constant-global`, `constant-per-entity`, and `lightgbm` are packaged in `relarena`, while `relarena-core` bundled in `tabpfn-rel` registers the TabPFN models `tabpfn-rel-client-latest`, `tabpfn-rel-client-2026-09-28`, `tabpfn-rel-client-2026-08-15`).*
+  *(Note: `relarena-core` bundled in `tabpfn-rel` exposes the registered TabPFN API models `tabpfn-rel-client-latest`, `tabpfn-rel-client-2026-09-28`, `tabpfn-rel-client-2026-08-15`; constant baselines are calculated in-process directly from task training tables at zero API cost).*
 - **Interface Selection**:
   - Selected by string identifier passed to `context.fit(model="...", n_trials=0)`, e.g.:
     - `context.fit(model="constant-global", n_trials=0)`
@@ -112,7 +112,7 @@ Two new operational tasks were formulated, executed on the local relational tabl
 - **Output Shape**: `(3095, 3)`
 - **Evaluation (Held-out Test ROC-AUC)**:
   - **TabPFN-Rel**: **0.7735**
-  - **Baseline Per-Entity**: 0.5000
+  - **Baseline Per-Entity**: **0.7160** (with pkey mapping)
   - **Baseline Global**: 0.5000
 
 ### Task Option B: High-Volume Seller Growth Surge (Merchant Growth Trigger)

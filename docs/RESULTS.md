@@ -19,7 +19,7 @@ This document contains **ONLY** verified, empirically measured metrics from real
 | :--- | :---: | :---: | :---: | :--- |
 | **TabPFN-Rel (zero-shot)** | **0.7734** | **0.4776** | **0.1310** | Zero-shot DFS + TabPFN-3.5 API in-context prediction |
 | **Baseline: Global Constant** | 0.5000 | — | — | Emits global training target base rate |
-| **Baseline: Per-Entity Constant** | 0.5000 | — | — | Emits per-entity historical rate, fallback to global |
+| **Baseline: Per-Entity Constant** | **0.7160** | — | — | Emits per-entity historical rate (mapped via pkey_maps), fallback to global |
 
 ### High-Confidence Ranking (Precision & Lift @ K)
 
