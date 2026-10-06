@@ -288,5 +288,5 @@ Per architectural scope decisions in `AGENTS.md`:
 
 ## 8. License
 
-- **RelPilot Code**: Released under the [MIT License](LICENSE).
+- **RelPilot Code**: Released under the [Apache License, Version 2.0](LICENSE).
 - **TabPFN-Rel & TabPFN-3.5 API**: Subject to Prior Labs terms of service and model licenses. See [Prior Labs Documentation](https://docs.priorlabs.ai/) and [PriorLabs/tabpfn-rel](https://github.com/PriorLabs/tabpfn-rel).

@@ -3,6 +3,7 @@ name = "relpilot"
 version = "0.1.0"
 description = "MCP server: zero-shot relational predictions with TabPFN-Rel, gated by temporal backtests"
 readme = "README.md"
+license = "Apache-2.0"
 authors = [
     { name = "Aniket Kharad", email = "92918607+aniketkharad@users.noreply.github.com" }
 ]
